@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Junta 360 Online</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#f3f6fb;--card:#fff;--ink:#172033;--muted:#64748b;--blue:#2563eb;--dark:#111827;--green:#16a34a;--orange:#d97706;--red:#dc2626;--line:#e5e7eb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Segoe UI,Arial,sans-serif}.top{height:64px;background:var(--dark);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;z-index:10}.brand{font-size:21px;font-weight:800}.brand b{color:#60a5fa}.wrap{max-width:1180px;margin:auto;padding:20px}.hero{background:linear-gradient(135deg,#172554,#2563eb);color:#fff;border-radius:18px;padding:24px;margin-bottom:16px}.hero h1{margin:0 0 6px;font-size:27px}.hero p{margin:0;color:#dbeafe}.grid{display:grid;gap:14px}.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}.card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px;box-shadow:0 5px 20px #0f172a08}.label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.metric{font-size:24px;font-weight:850;margin-top:6px}.btn{border:0;border-radius:9px;padding:10px 14px;background:#e5e7eb;font-weight:700;cursor:pointer}.primary{background:var(--blue);color:#fff}.success{background:var(--green);color:#fff}.danger{background:var(--red);color:#fff}.orange{background:var(--orange);color:#fff}.small{padding:7px 10px;font-size:12px}.form{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}label{display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:5px}input,select{width:100%;padding:10px;border:1px solid #d6dbe4;border-radius:9px;background:#fff}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.hidden{display:none!important}.view{display:none}.view.active{display:block}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}.tabs .active{background:var(--blue);color:#fff}.badge{display:inline-block;border-radius:99px;padding:4px 8px;font-size:11px;font-weight:700}.ok{background:#dcfce7;color:#166534}.wait{background:#fef3c7;color:#92400e}.bad{background:#fee2e2;color:#991b1b}.blue{background:#dbeafe;color:#1e40af}.numbergrid{display:grid;grid-template-columns:repeat(10,1fr);gap:7px}.num{border:0;border-radius:8px;padding:10px 4px;background:#eef2f7;font-weight:800;cursor:pointer}.num.taken{background:#dbeafe;color:#1e40af;cursor:not-allowed}.num.mine{background:#16a34a;color:#fff}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:9px 7px;border-bottom:1px solid var(--line);font-size:13px;text-align:left}th{background:#f8fafc;color:#64748b}.calc{background:#f8fafc;border-radius:12px;padding:13px;margin-top:12px}.big{font-size:26px;font-weight:850}.choice{border:2px solid var(--line);border-radius:12px;padding:13px;cursor:pointer}.choice.selected{border-color:var(--blue);background:#eff6ff}.choice strong{display:block}.choice span{font-size:12px;color:var(--muted)}.modal{position:fixed;inset:0;background:#0f172a99;display:flex;align-items:center;justify-content:center;padding:18px;z-index:30}.modalbox{width:min(650px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:16px;padding:20px}.toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;padding:12px 15px;border-radius:10px;z-index:50}
+@media(max-width:900px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(2,1fr)}.numbergrid{grid-template-columns:repeat(6,1fr)}}
+@media(max-width:600px){.wrap{padding:12px}.top{padding:0 13px}.g4,.g3,.g2,.form{grid-template-columns:1fr}.numbergrid{grid-template-columns:repeat(5,1fr)}.hero h1{font-size:22px}}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}.modalbox{background:#fff;border-radius:18px;max-width:720px;width:100%;max-height:90vh;overflow:auto;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.25)}.modalhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.modalbox label{display:block;margin-top:10px;font-weight:700}.modalbox input,.modalbox select{width:100%;padding:11px;border:1px solid #d1d5db;border-radius:10px}.hidden{display:none!important}</style>
+</head>
+<body>
+<header class="top"><div class="brand">Junta <b>360</b></div><div id="mode">Online</div></header>
+<main class="wrap">
+
+<section id="home" class="view active">
+<div class="hero"><h1>Junta de Dinero 360</h1><p>Versión online: administrador y participantes comparten la misma información en tiempo real.</p></div>
+<div class="grid g2">
+<div class="card"><h2>🔐 Administrador</h2><p class="label">Crear o abrir una junta</p><button class="btn primary" onclick="show('create')">Crear junta online</button><div class="actions"><button class="btn" onclick="openAdmin()">Abrir panel administrativo</button></div></div>
+<div class="card"><h2>👤 Participante</h2><p class="label">Entra mediante el enlace de invitación</p><button class="btn success" onclick="openParticipant()">Abrir enlace de participante</button></div>
+</div>
+<div class="card" style="margin-top:14px"><h3>¿Qué cambia al estar online?</h3><div class="grid g3"><div>☁️ Datos compartidos</div><div>🔢 Números se bloquean al registrarse</div><div>📱 Acceso desde celular o PC</div></div></div>
+</section>
+
+<section id="create" class="view">
+<div class="card"><h2>Crear nueva junta</h2><div class="form">
+<div><label>Nombre de la junta</label><input id="cName" value="Junta de Dinero"></div>
+<div><label>Cuota mensual por número</label><input id="cQuota" type="number" value="500" min="1" step=".01"></div>
+<div><label>Cantidad máxima de números</label><input id="cNumbers" type="number" value="20" min="1" max="500"></div>
+<div><label>Fecha de inicio</label><input id="cStart" type="date"></div>
+<div><label>Periodicidad</label><select id="cFreq"><option value="15fin">15 y fin de mes</option><option value="Mensual">Mensual</option><option value="Quincenal">Quincenal</option><option value="Semanal">Semanal</option></select></div>
+<div><label>Modalidad inicial</label><div class="choice selected" style="cursor:default"><strong>🎯 Sorteo</strong><span>Todos comienzan en Sorteo. El participante podrá cambiar a Lance más adelante.</span></div></div>
+<div><label>Adicional del lance (%)</label><input id="cRate" type="number" value="20" min="0" step=".1"></div>
+</div><div class="actions"><button class="btn primary" onclick="createJunta()">Crear junta</button><button class="btn" onclick="show('home')">Cancelar</button></div></div>
+</section>
+
+<section id="created" class="view">
+<div class="card"><h2>✅ Junta creada</h2><p>Guarda estos enlaces. El enlace administrativo es privado.</p><label>Enlace administrativo</label><input id="adminUrl" readonly><label style="margin-top:10px">Enlace para participantes</label><input id="participantUrl" readonly><div class="actions"><button class="btn primary" onclick="copy('adminUrl')">Copiar admin</button><button class="btn success" onclick="copy('participantUrl')">Copiar participante</button><button class="btn primary" onclick="openParticipantLink()">Abrir participante</button><button class="btn orange" onclick="waInvite()">Enviar invitación por WhatsApp</button><button class="btn" onclick="openAdmin()">Abrir administración</button></div><div style="margin-top:12px;padding:12px;border:1px solid #dbe3ef;border-radius:10px;background:#f8fafc"><a id="participantAnchor" href="#" target="_blank" rel="noopener" style="font-weight:700;color:#2563eb;word-break:break-all">Abrir enlace del participante</a><div style="font-size:12px;color:#64748b;margin-top:5px">En local funcionará en este PC. Para usarlo desde el celular hay que publicar la app en Vercel.</div></div></div>
+</section>
+
+<section id="admin" class="view">
+<div class="hero"><h1 id="aName"></h1><p id="aInfo"></p></div>
+<div class="tabs"><button class="btn active" onclick="atab('summary',this)">Resumen</button><button class="btn" onclick="atab('settings',this)">Configuración</button><button class="btn" onclick="atab('people',this)">Participantes</button><button class="btn" onclick="atab('schedule',this)">Cronograma</button><button class="btn" onclick="atab('invite',this)">Invitar</button></div>
+<div id="tsummary" class="at">
+<div class="grid g4">
+<div class="card"><div class="label">Cuota sorteo</div><div class="metric" id="aq"></div></div>
+<div class="card"><div class="label">Cuota lance</div><div class="metric" id="al"></div></div>
+<div class="card"><div class="label">Números ocupados</div><div class="metric" id="au"></div></div>
+<div class="card"><div class="label">Participantes activos</div><div class="metric" id="ap"></div></div>
+</div>
+<div class="grid g3" style="margin-top:14px">
+<div class="card"><div class="label">Total comprometido</div><div class="metric" id="atotal"></div></div>
+<div class="card"><div class="label">Próxima fecha de pago</div><div class="metric" id="anext"></div></div>
+<div class="card"><div class="label">Turnos programados</div><div class="metric" id="aturnos"></div></div>
+</div>
+<div class="card" style="margin-top:14px">
+<h3 style="margin:0 0 8px">Resumen de participantes</h3>
+<div id="apeople" class="tablewrap"></div>
+</div>
+<div class="card" style="margin-top:14px">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+<div><h3 style="margin:0">Programa general de pagos</h3><div class="label" style="margin-top:4px">Fechas programadas: día 15 y último día de cada mes</div></div>
+<button class="btn primary small" onclick="makeSchedule()">Generar / actualizar programa</button>
+</div>
+<div id="ageneralSchedule" class="tablewrap" style="margin-top:12px"></div>
+</div>
+<div class="card" style="margin-top:14px"><h3>Números</h3><div id="anums" class="numbergrid"></div></div>
+</div>
+<div id="tsettings" class="at hidden"><div class="card"><h3>Configuración</h3><div class="form"><div><label>Nombre</label><input id="sName"></div><div><label>Cuota</label><input id="sQuota" type="number" step=".01"></div><div><label>Periodicidad</label><select id="sFreq"><option value="15fin">15 y fin de mes</option><option value="Mensual">Mensual</option><option value="Quincenal">Quincenal</option><option value="Semanal">Semanal</option></select></div><div><label>Fecha inicio</label><input id="sStart" type="date"></div><div><label>Modalidad inicial</label><div class="choice selected" style="cursor:default"><strong>🎯 Sorteo</strong><span>La junta inicia en Sorteo. El Lance se activa solo cuando el participante lo elige.</span></div></div><div><label>Lance adicional %</label><input id="sRate" type="number" step=".1"></div></div><div class="actions"><button class="btn primary" onclick="saveSettings()">Guardar</button></div></div></div>
+<div id="tpeople" class="at hidden"><div class="card"><h3>Gestión de participantes</h3><div id="peopleFull" class="tablewrap"></div></div></div>
+<div id="tschedule" class="at hidden"><div class="card"><h3>Cronograma</h3><button class="btn primary small" onclick="makeSchedule()">Generar / actualizar</button><div id="schedule" class="tablewrap" style="margin-top:12px"></div></div></div>
+<div id="tinvite" class="at hidden"><div class="card"><h3>Enlace de invitación</h3><input id="publicAppUrl" placeholder="https://tu-app.vercel.app" style="margin-bottom:6px"><button type="button" class="btn small" onclick="savePublicAppUrl()">Usar URL pública</button> <input id="invite" readonly><div class="actions"><button class="btn primary" onclick="copy('invite')">Copiar</button><button class="btn success" onclick="waInvite()">WhatsApp</button></div></div></div>
+</section>
+
+<section id="participant" class="view">
+<div class="hero"><h1 id="pNameTitle"></h1><p id="pInfo"></p></div>
+<div id="myParticipationCard" class="card hidden" style="margin-bottom:14px"></div>
+<div id="newParticipantCard" class="card"><h3>1. Tus datos</h3><div class="form"><div><label>Nombre completo</label><input id="pName"></div><div><label>WhatsApp</label><input id="pPhone" placeholder="9XXXXXXXX"></div></div>
+<h3 style="margin-top:20px">2. Modalidad inicial</h3><div class="choice selected" style="cursor:default"><strong>🎯 Sorteo</strong><span>La participación comienza siempre en Sorteo. Lance se habilita después mediante tu enlace personal.</span></div>
+<h3 style="margin-top:20px">3. Selecciona tus números</h3><div id="pNums" class="numbergrid"></div>
+<div class="calc"><div class="label">Resumen inicial</div><div>Números: <b id="pCount">0</b></div><div>Valor por número: <b id="pUnit">S/ 0.00</b></div><div class="big" id="pTotal">S/ 0.00</div></div>
+<div class="actions"><button class="btn success" onclick="register()">Confirmar participación</button><button class="btn" onclick="show('home')">Salir</button></div></div>
+</section>
+
+<section id="done" class="view"><div class="card" style="max-width:650px;margin:30px auto;text-align:center"><div style="font-size:45px">🎉</div><h2>Participación registrada</h2><p id="doneText"></p><div id="doneNums" class="numbergrid"></div><div id="donePortalLink" style="margin-top:14px;text-align:left"></div><div class="actions" style="justify-content:center"><button class="btn success" onclick="shareDone()">WhatsApp</button><button class="btn primary" onclick="openMyPortal()">Mi participación</button><button class="btn" onclick="show('home')">Cerrar</button></div></div></section>
+</main>
+<div id="editModal" class="modal hidden"><div class="modalbox"><div class="modalhead"><h3>Editar participante</h3><button class="btn small" onclick="closeEdit()">✕</button></div><input type="hidden" id="eId"><label>Nombre completo</label><input id="eName"><label>WhatsApp</label><input id="ePhone"><label>Modalidad</label><select id="eMode"><option value="sorteo">Sorteo</option><option value="lance">Lance</option></select><label>Números</label><div id="eNums" class="numbergrid"></div><div class="calc"><div>Números seleccionados: <b id="eCount">0</b></div><div>Total: <b id="eTotal">S/ 0.00</b></div></div><div class="actions"><button class="btn primary" onclick="saveEditP()">Guardar cambios</button><button class="btn" onclick="closeEdit()">Cancelar</button></div></div></div>
+<div id="toast" class="toast hidden"></div>
+<script>
+const SUPABASE_URL='https://rndsxumiwrpmzrulggdb.supabase.co';
+const KEY='sb_publishable_0cd6PNzWblnch1SUzoUh2A_J4YQX7rZ';
+const {createClient}=supabase;
+const params=new URLSearchParams(location.search);
+let access=params.get('junta')||localStorage.getItem('junta_access')||'';
+let participantToken=params.get('participante')||localStorage.getItem('junta_participant')||'';
+let MyP=null;
+let adminToken=params.get('admin')||localStorage.getItem('junta_admin')||'';
+const PUBLIC_APP_URL=(localStorage.getItem('junta_public_url')||'').trim().replace(/\/+$/,'');
+function appBase(){
+  if(PUBLIC_APP_URL) return PUBLIC_APP_URL;
+  if(location.protocol==='http:'||location.protocol==='https:') return location.origin+location.pathname;
+  return '';
+}
+function makeParticipantLink(code, token=''){
+  const base=appBase();
+  if(!base) return '';
+  let u=base+'?junta='+encodeURIComponent(code);
+  if(token) u+='&participante='+encodeURIComponent(token);
+  return u;
+}
+function makeAdminLink(token){
+  const base=appBase();
+  return base?base+'?admin='+encodeURIComponent(token):'';
+}
+function localLinkMessage(){
+  return 'Esta copia está abierta como archivo local. Para compartir con un celular debes usar la URL pública de la app.';
+}
+let J=null,N=[],P=[],S=[],H=[],selected=[],mode='sorteo',last=null;
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const money=n=>'S/ '+Number(n||0).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});
+function client(headers={}){return createClient(SUPABASE_URL,KEY,{global:{headers}})}
+function toast(x){let e=document.getElementById('toast');e.textContent=x;e.classList.remove('hidden');setTimeout(()=>e.classList.add('hidden'),2300)}
+function show(id){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.getElementById('mode').textContent=id==='admin'?'Administrador':id==='participant'?'Participante':'Online'}
+function copy(id){navigator.clipboard?.writeText(document.getElementById(id).value);toast('Enlace copiado')}
+function defaultDate(){return new Date().toISOString().slice(0,10)}
+document.getElementById('cStart').value=defaultDate();
+
+function checkSupabaseClient(){
+ try{ client(); return null; }catch(e){ return e.message||'Error de conexión'; }
+}
+
+async function createJunta(){
+ try{
+  const s={name:document.getElementById('cName').value.trim()||'Junta de Dinero',contribution:Number(document.getElementById('cQuota').value),numbers:Number(document.getElementById('cNumbers').value),start:document.getElementById('cStart').value,frequency:document.getElementById('cFreq').value,modality:'sorteo',lance_rate:Number(document.getElementById('cRate').value||20)};
+  if(!s.contribution||s.contribution<=0)return toast('Ingresa una cuota válida');
+  if(!s.numbers||s.numbers<1||s.numbers>500)return toast('Ingresa entre 1 y 500 números');
+  const clientError=checkSupabaseClient(); if(clientError) throw new Error('Conexión Supabase: '+clientError); const btn=document.querySelector('#create .btn.primary'); if(btn){btn.disabled=true;btn.textContent='Creando…';}
+  const {data,error}=await client().rpc('create_junta_online',{p_name:s.name,p_contribution:s.contribution,p_numbers:s.numbers,p_start_date:s.start||null,p_frequency:s.frequency,p_modality:s.modality,p_lance_rate:s.lance_rate});
+  if(error)throw error;
+  if(!data||!data.id)throw new Error('La junta no fue creada correctamente');
+  J=data;adminToken=data.admin_token;access=data.access_code;localStorage.setItem('junta_admin',adminToken);localStorage.setItem('junta_access',access);
+  const adminLink=makeAdminLink(adminToken);
+  const participantLink=makeParticipantLink(access);
+  document.getElementById('adminUrl').value=adminLink||'Pendiente: publicar la app';
+  document.getElementById('participantUrl').value=participantLink||'Pendiente: publicar la app';
+  const pa=document.getElementById('participantAnchor');
+  if(pa){pa.href=participantLink||'#';pa.textContent=participantLink||'Publica la app para obtener el enlace';}
+  show('created');
+  toast(participantLink?'Junta creada correctamente':'Junta creada. Publica la app para compartirla al celular');
+ }catch(e){console.error(e);toast('No se pudo crear la junta: '+(e.message||'Error'));}
+ finally{const btn=document.querySelector('#create .btn.primary');if(btn){btn.disabled=false;btn.textContent='Crear junta';}}
+}
+async function loadPublic(){
+ if(!access)return openParticipant();
+ const c=client({'x-junta-code':access});
+ let {data,error}=await c.from('juntas').select('id,name,contribution,start_date,frequency,modality,lance_rate,total_pot').eq('access_code',access).maybeSingle();
+ if(error||!data){toast('Enlace de junta inválido');return show('home')}
+ J=data;
+ let q=await c.from('junta_numbers').select('number_no,participant_id').eq('junta_id',J.id).order('number_no');
+ if(q.error)return toast(q.error.message);
+ N=q.data||[];
+ renderParticipant();
+ await loadMyParticipation();
+}
+function openParticipantLink(){
+ const u=document.getElementById('participantUrl')?.value||'';
+ if(!u||u.startsWith('Pendiente'))return toast(localLinkMessage());
+ window.location.assign(u);
+}
+async function openParticipant(){show('participant');await loadPublic()}
+function renderParticipant(){
+ document.getElementById('pNameTitle').textContent=J?.name||'Participar';
+ if(!J)return;
+ document.getElementById('pInfo').textContent=`Cuota inicial Sorteo ${money(J.contribution)} por número · Lance ${money(J.contribution*(1+(J.lance_rate||20)/100))} por número cuando el participante lo elija`;
+ document.getElementById('choices')?.replaceChildren?.();
+ if(document.getElementById('pNums')){
+  document.getElementById('pNums').innerHTML=N.map(x=>`<button type="button" class="num ${x.participant_id?'taken':''} ${selected.includes(x.number_no)?'mine':''}" ${x.participant_id?'disabled':''} onclick="toggle(${x.number_no})">${String(x.number_no).padStart(2,'0')}</button>`).join('');
+ }
+ mode='sorteo'; calc();
+}
+function setMode(m){mode=m;renderParticipant()}function toggle(n){if(selected.includes(n))selected=selected.filter(x=>x!==n);else selected.push(n);selected.sort((a,b)=>a-b);renderParticipant()}
+function calc(){
+ let u=J?Number(J.contribution||0):0;
+ document.getElementById('pCount').textContent=selected.length;
+ document.getElementById('pUnit').textContent=money(u);
+ document.getElementById('pTotal').textContent=money(u*selected.length);
+}
+async function register(){
+ const name=document.getElementById('pName').value.trim(),phone=document.getElementById('pPhone').value.trim();
+ if(!name||!phone)return toast('Completa nombre y WhatsApp');
+ if(!selected.length)return toast('Selecciona al menos un número');
+ const {data,error}=await client().rpc('register_junta_participant',{
+   p_access_code:access,p_name:name,p_phone:phone,p_modality:'sorteo',p_numbers:selected
+ });
+ if(error){toast(error.message||'No se pudo registrar');await loadPublic();return}
+ last=data;
+ participantToken=data.public_token||'';
+ if(participantToken)localStorage.setItem('junta_participant',participantToken);
+ const myLink=participantToken?makeParticipantLink(access,participantToken):'';
+ document.getElementById('doneText').innerHTML=`<b>${esc(name)}</b>, quedaste registrado en <b>${esc(J.name)}</b>.<br>Números: <b>${selected.join(', ')}</b><br>Modalidad inicial: <b>Sorteo</b><br>Cuota por número: <b>${money(data.unit_amount)}</b>`;
+ document.getElementById('doneNums').innerHTML=selected.map(n=>`<div class="num mine">${String(n).padStart(2,'0')}</div>`).join('');
+ document.getElementById('donePortalLink').innerHTML=myLink?`<div class="label">Tu enlace personal</div><a href="${myLink}" target="_blank" rel="noopener" style="font-weight:700;color:#2563eb;word-break:break-all">${myLink}</a><div class="label" style="margin-top:5px">Guárdalo. Desde aquí podrás cambiar a Lance más adelante.</div>`:'';
+ selected=[];show('done');
+}
+function shareDone(){if(!last)return;let msg=`Confirmo mi participación en ${J.name}. Números: ${last.numbers.join(', ')}. Modalidad: ${last.modality==='lance'?'Lance':'Sorteo'}. Total: ${money(last.total_amount)}.`;window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank')}
+
+async function loadMyParticipation(){
+ if(!participantToken||!J)return;
+ const {data,error}=await client().rpc('get_participant_portal',{p_public_token:participantToken});
+ if(error||!data){ participantToken=''; localStorage.removeItem('junta_participant'); return; }
+ MyP=data;
+ const card=document.getElementById('myParticipationCard');
+ const newCard=document.getElementById('newParticipantCard');
+ if(newCard)newCard.classList.add('hidden');
+ if(card){
+   const isLance=data.modality==='lance';
+   card.classList.remove('hidden');
+   card.innerHTML=`
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+      <div><div class="label">Mi participación</div><h3 style="margin:4px 0">${esc(data.name||'Participante')}</h3>
+      <div class="label">Números: <b>${(data.numbers||[]).join(', ')||'—'}</b></div></div>
+      <span class="badge ${isLance?'wait':'ok'}">${isLance?'Lance activo':'Sorteo'}</span>
+    </div>
+    <div class="grid g3" style="margin-top:12px">
+      <div><div class="label">Cuota por número</div><strong>${money(data.unit_amount)}</strong></div>
+      <div><div class="label">Total por turno</div><strong>${money(data.total_amount)}</strong></div>
+      <div><div class="label">Cambio de modalidad</div><strong>${fmtDateTime(data.modality_effective_at)}</strong></div>
+    </div>
+    ${isLance
+      ? '<div style="margin-top:12px;padding:12px;border-radius:10px;background:#f0fdf4">✅ Tus próximas cuotas se calculan con Lance. Las cuotas anteriores al cambio no se modifican.</div>'
+      : '<div style="margin-top:12px;padding:12px;border-radius:10px;background:#fff7ed">La junta comenzó en Sorteo. El +20% de Lance solo se aplicará a las cuotas posteriores al momento en que confirmes el cambio.</div><div class="actions"><button class="btn orange" onclick="changeToLance()">Cambiar a Lance</button><button class="btn" onclick="show(&#39;home&#39;)">Salir</button></div>'
+    }`;
+ }
+}
+function fmtDateTime(s){
+ if(!s)return '—';
+ const d=new Date(s);
+ return isNaN(d)?'—':d.toLocaleString('es-PE',{dateStyle:'short',timeStyle:'short'});
+}
+async function changeToLance(){
+ if(!participantToken)return toast('No se encontró tu enlace personal');
+ if(!confirm('¿Confirmas que quieres pasar a Lance? El cambio aplicará desde este momento y no modificará cuotas anteriores.'))return;
+ const {data,error}=await client().rpc('participant_change_modality',{p_public_token:participantToken,p_new_modality:'lance'});
+ if(error)return toast(error.message||'No se pudo cambiar a Lance');
+ toast('Cambio a Lance registrado');
+ await loadMyParticipation();
+}
+function openMyPortal(){
+ if(!participantToken)return toast('No existe un enlace personal');
+ const u=makeParticipantLink(access,participantToken);
+ if(!u)return toast(localLinkMessage());
+ window.location.assign(u);
+}
+
+async function openAdmin(){if(!adminToken){show('home');return toast('Abre el enlace administrativo que recibiste al crear la junta.')}show('admin');await loadAdmin()}
+async function loadAdmin(){
+ const c=client({'x-admin-token':adminToken});let r=await c.from('juntas').select('*').eq('admin_token',adminToken).maybeSingle();if(r.error||!r.data){show('home');return toast('Enlace administrativo inválido')}J=r.data;
+ let [n,p,s,h]=await Promise.all([
+  c.from('junta_numbers').select('number_no,participant_id').eq('junta_id',J.id).order('number_no'),
+  c.from('participants').select('id,name,phone,participant_order,modality,modality_effective_at,number_count,unit_amount,total_amount,status,created_at').eq('junta_id',J.id).order('participant_order'),
+  c.from('junta_participants').select('*').eq('junta_id',J.id).order('turn_order'),
+  c.from('participant_modality_history').select('participant_id,modality,effective_at')
+]);
+N=n.data||[];P=p.data||[];S=s.data||[];H=h.data||[];renderAdmin();
+}
+
+function parseLocalDate(s){
+ const [y,m,d]=String(s||'').split('-').map(Number);
+ return Number.isFinite(y)&&Number.isFinite(m)&&Number.isFinite(d)?new Date(y,m-1,d):new Date();
+}
+function isoDate(d){
+ const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+ return `${y}-${m}-${day}`;
+}
+function fmtDate(s){
+ if(!s)return '—';
+ const d=parseLocalDate(s);
+ return d.toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+function monthEnd(y,m){ return new Date(y,m+1,0); }
+function generalPaymentDates(start,count){
+ const base=parseLocalDate(start||defaultDate()), out=[];
+ if(count<1)return out;
+ const y=base.getFullYear(),m=base.getMonth();
+ const candidates=[new Date(y,m,15),monthEnd(y,m)];
+ candidates.sort((a,b)=>a-b);
+ for(const d of candidates) if(d>=base && out.length<count) out.push(d);
+ let k=0;
+ while(out.length<count && k<60){
+   const mm=m+1+k, yy=y+Math.floor(mm/12), mon=mm%12;
+   const a=new Date(yy,mon,15), b=monthEnd(yy,mon);
+   out.push(a); if(out.length<count) out.push(b);
+   k++;
+ }
+ return out;
+}
+function activeParticipants(){
+ return P.filter(x=>x.status==='active').slice().sort((a,b)=>{
+   const ao=a.participant_order==null?999999:a.participant_order;
+   const bo=b.participant_order==null?999999:b.participant_order;
+   return ao-bo || String(a.created_at||'').localeCompare(String(b.created_at||''));
+ });
+}
+function modalityAtDate(participantId,dateStr){
+ const d=parseLocalDate(dateStr);
+ d.setHours(23,59,59,999);
+ const items=(H||[]).filter(h=>h.participant_id===participantId && new Date(h.effective_at).getTime()<=d.getTime())
+   .sort((a,b)=>new Date(a.effective_at)-new Date(b.effective_at));
+ return items.length?items[items.length-1].modality:'sorteo';
+}
+function buildGeneralRows(){
+ const active=activeParticipants();
+ const dates=generalPaymentDates(J.start_date||defaultDate(),active.length);
+ const mp={}; N.forEach(n=>{ if(n.participant_id){ (mp[n.participant_id] ||= []).push(n.number_no); }});
+ const lanceUnit=Number(J.contribution||0)*(1+Number(J.lance_rate||20)/100);
+ return active.map((p,i)=>{
+   const nums=(mp[p.id]||[]).sort((a,b)=>a-b);
+   const d=dates[i];
+   const date=d?isoDate(d):'';
+   const modality=modalityAtDate(p.id,date);
+   const unit=modality==='lance'?lanceUnit:Number(J.contribution||0);
+   return {turn:i+1,date,name:p.name,numbers:nums,modality:modality==='lance'?'Lance':'Sorteo',total:unit*nums.length,unit};
+ });
+}
+function renderAdmin(){
+ const active=activeParticipants();
+ document.getElementById('aName').textContent=J.name;
+ document.getElementById('aInfo').textContent=`Inicio: Sorteo ${money(J.contribution)} por número · Lance ${money(J.contribution*(1+(J.lance_rate||20)/100))} solo desde que el participante lo elige · ${J.frequency==='15fin'?'15 y fin de mes':J.frequency}`;
+ const lanceUnit=J.contribution*(1+(J.lance_rate||20)/100);
+ document.getElementById('aq').textContent=money(J.contribution);
+ document.getElementById('al').textContent=money(lanceUnit);
+ document.getElementById('au').textContent=N.filter(x=>x.participant_id).length+' / '+N.length;
+ document.getElementById('ap').textContent=active.length;
+ const total=active.reduce((sum,p)=>sum+Number(p.total_amount||0),0);
+ document.getElementById('atotal').textContent=money(total);
+ const rows=buildGeneralRows();
+ document.getElementById('aturnos').textContent=rows.length;
+ document.getElementById('anext').textContent=rows[0]?.date?fmtDate(rows[0].date):'—';
+
+ let mp={};N.forEach(x=>{if(x.participant_id)mp[x.participant_id]=x;});
+ document.getElementById('anums').innerHTML=N.map(x=>`<div class="num ${x.participant_id?'mine':''}" title="${esc((P.find(p=>p.id===x.participant_id)||{}).name||'Disponible')}">${String(x.number_no).padStart(2,'0')}</div>`).join('');
+
+ let table=active.length?`<table>
+ <tr><th>#</th><th>Participante</th><th>WhatsApp</th><th>Números</th><th>Modalidad</th><th>N°</th><th>Total</th><th>Estado</th><th></th></tr>
+ ${active.map((p,i)=>{
+   const nums=N.filter(n=>n.participant_id===p.id).map(n=>n.number_no).sort((a,b)=>a-b);
+   return `<tr><td>${i+1}</td><td><b>${esc(p.name)}</b></td><td>${esc(p.phone||'')}</td><td>${nums.join(', ')||'—'}</td><td>${p.modality==='lance'?'Lance':'Sorteo'}</td><td>${nums.length}</td><td>${money(p.total_amount||0)}</td><td><span class="badge ok">Activo</span></td><td><button class="btn small" onclick="editP('${p.id}')">Editar</button> <button class="btn small danger" onclick="removeP('${p.id}')">Retirar</button></td></tr>`;
+ }).join('')}</table>`:'<p class="label">No hay participantes activos.</p>';
+ document.getElementById('apeople').innerHTML=table;
+ document.getElementById('peopleFull').innerHTML=table;
+
+ const general=rows.length?`<table>
+ <tr><th>Turno</th><th>Fecha de pago</th><th>Participante</th><th>Números</th><th>Modalidad</th><th>Total del turno</th><th>Estado</th></tr>
+ ${rows.map(r=>`<tr><td>${r.turn}</td><td><b>${fmtDate(r.date)}</b></td><td><b>${esc(r.name)}</b></td><td>${r.numbers.join(', ')||'—'}</td><td>${r.modality}</td><td>${money(r.total)}</td><td><span class="badge wait">${r.modality==='Lance'?'Lance desde cambio':'Sorteo'}</span></td></tr>`).join('')}</table>`:'<p class="label">Agrega participantes para construir el programa general.</p>';
+ document.getElementById('ageneralSchedule').innerHTML=general;
+ document.getElementById('schedule').innerHTML=rows.length?general:'<p class="label">No hay cronograma.</p>';
+
+ document.getElementById('sName').value=J.name;
+ document.getElementById('sQuota').value=J.contribution;
+ document.getElementById('sFreq').value=J.frequency;
+ document.getElementById('sStart').value=J.start_date||'';
+ document.getElementById('sRate').value=J.lance_rate||20;
+ if(document.getElementById('publicAppUrl'))document.getElementById('publicAppUrl').value=PUBLIC_APP_URL;
+ document.getElementById('invite').value=makeParticipantLink(J.access_code)||'Pendiente: publicar la app';
+}
+function savePublicAppUrl(){
+ const v=(document.getElementById('publicAppUrl')?.value||'').trim().replace(/\/+$/,'');
+ if(!/^https?:\/\//i.test(v))return toast('Ingresa una URL pública que empiece con https://');
+ localStorage.setItem('junta_public_url',v);
+ if(document.getElementById('invite'))document.getElementById('invite').value=makeParticipantLink(J.access_code);
+ toast('URL pública guardada');
+}
+function atab(id,b){document.querySelectorAll('.at').forEach(x=>x.classList.add('hidden'));document.getElementById('t'+id).classList.remove('hidden');document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active')}
+async function saveSettings(){let c=client({'x-admin-token':adminToken});let patch={name:document.getElementById('sName').value.trim(),contribution:+document.getElementById('sQuota').value,frequency:document.getElementById('sFreq').value,start_date:document.getElementById('sStart').value,lance_rate:+document.getElementById('sRate').value,modality:'sorteo'};let r=await c.from('juntas').update(patch).eq('id',J.id);if(r.error)return toast(r.error.message);await loadAdmin();toast('Configuración actualizada. La modalidad inicial sigue siendo Sorteo.')}
+async function editP(id){
+ const p=P.find(x=>x.id===id);if(!p)return;
+ document.getElementById('eId').value=id;document.getElementById('eName').value=p.name||'';document.getElementById('ePhone').value=p.phone||'';document.getElementById('eMode').value=p.modality||'sorteo';
+ const current=N.filter(n=>n.participant_id===id).map(n=>n.number_no);selected=[...current];renderEditNumbers();document.getElementById('editModal').classList.remove('hidden');
+}
+function closeEdit(){document.getElementById('editModal').classList.add('hidden');selected=[]}
+function renderEditNumbers(){const modeE=document.getElementById('eMode').value;const unit=modeE==='lance'?J.contribution*(1+(J.lance_rate||20)/100):J.contribution;document.getElementById('eNums').innerHTML=N.map(x=>{const mine=N.some(n=>n.number_no===x.number_no&&n.participant_id===document.getElementById('eId').value);const taken=x.participant_id&&!mine;return `<button type="button" class="num ${taken?'taken':''} ${selected.includes(x.number_no)?'mine':''}" ${taken?'disabled':''} onclick="toggleEditNum(${x.number_no})">${String(x.number_no).padStart(2,'0')}</button>`}).join('');document.getElementById('eCount').textContent=selected.length;document.getElementById('eTotal').textContent=money(unit*selected.length)}
+function toggleEditNum(n){if(selected.includes(n))selected=selected.filter(x=>x!==n);else selected.push(n);selected.sort((a,b)=>a-b);renderEditNumbers()}
+document.addEventListener('change',e=>{if(e.target.id==='eMode')renderEditNumbers()});
+async function saveEditP(){const id=document.getElementById('eId').value,name=document.getElementById('eName').value.trim(),phone=document.getElementById('ePhone').value.trim(),m=document.getElementById('eMode').value;if(!name||!phone)return toast('Completa nombre y WhatsApp');if(!selected.length)return toast('Selecciona al menos un número');const {error}=await client().rpc('admin_update_junta_participant',{p_admin_token:adminToken,p_participant_id:id,p_name:name,p_phone:phone,p_modality:m,p_numbers:selected});if(error)return toast(error.message||'No se pudo guardar');closeEdit();await loadAdmin();toast('Participante actualizado')}
+async function removeP(id){if(!confirm('¿Retirar al participante y liberar sus números?'))return;const {error}=await client().rpc('admin_remove_junta_participant',{p_admin_token:adminToken,p_participant_id:id});if(error)return toast(error.message||'No se pudo retirar');await loadAdmin();toast('Participante retirado')}
+
+async function makeSchedule(){
+ const active=activeParticipants();
+ if(!active.length)return toast('No hay participantes activos');
+ const c=client({'x-admin-token':adminToken});
+ const del=await c.from('junta_participants').delete().eq('junta_id',J.id);
+ if(del.error)return toast('No se pudo limpiar el programa: '+del.error.message);
+ const rows=buildGeneralRows().map(r=>({
+   junta_id:J.id,
+   name:r.name,
+   scheduled_date:r.date,
+   turn_order:r.turn,
+   scheduled_modality:r.modality.toLowerCase(),
+   scheduled_amount:r.total
+ }));
+ const r=await c.from('junta_participants').insert(rows);
+ if(r.error)return toast('No se pudo guardar el programa: '+r.error.message);
+ await loadAdmin();
+ atab('schedule',document.querySelectorAll('.tabs button')[3]);
+ toast('Programa general actualizado');
+}
+function waInvite(){
+ const u=makeParticipantLink(J?.access_code||'');
+ if(!u)return toast(localLinkMessage());
+ const msg=`Hola, te invito a participar en ${J?.name||'mi junta'}.\nSelecciona tus números aquí:\n${u}`;
+ window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+if(new URLSearchParams(location.search).has('admin'))openAdmin();else if(access)openParticipant();
+</script>
+</body>
+</html>
